@@ -17,6 +17,6 @@ RUN apt install -y ca-certificates
 RUN mkdir /app
 COPY --from=builder /go/src/github.com/prebid/prebid-cache/prebid-cache /app/prebid-cache
 ADD ./config.yaml /app/
-
+ADD ./bin/entrypoint.sh /
 WORKDIR /app
 CMD ["./prebid-cache"]
