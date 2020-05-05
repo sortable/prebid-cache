@@ -31,6 +31,7 @@ func setConfigDefaults(v *viper.Viper) {
 	v.SetDefault("request_limits.max_size_bytes", 10*1024)
 	v.SetDefault("request_limits.max_num_values", 10)
 	v.SetDefault("request_limits.max_ttl_seconds", 3600)
+	v.SetDefault("response_caching.ttl_seconds", 60)
 	v.SetDefault("metrics.graphite.host", "")
 	v.SetDefault("metrics.graphite.prefix", "")
 	v.SetDefault("metrics.graphite.interval_sec", 10)
@@ -50,14 +51,15 @@ func setEnvVars(v *viper.Viper) {
 }
 
 type Configuration struct {
-	Port          int           `mapstructure:"port"`
-	AdminPort     int           `mapstructure:"admin_port"`
-	Log           Log           `mapstructure:"log"`
-	RateLimiting  RateLimiting  `mapstructure:"rate_limiter"`
-	RequestLimits RequestLimits `mapstructure:"request_limits"`
-	Backend       Backend       `mapstructure:"backend"`
-	Compression   Compression   `mapstructure:"compression"`
-	Metrics       Metrics       `mapstructure:"metrics"`
+	Port            int             `mapstructure:"port"`
+	AdminPort       int             `mapstructure:"admin_port"`
+	Log             Log             `mapstructure:"log"`
+	RateLimiting    RateLimiting    `mapstructure:"rate_limiter"`
+	RequestLimits   RequestLimits   `mapstructure:"request_limits"`
+	ResponseCaching ResponseCaching `mapstructure:"response_caching"`
+	Backend         Backend         `mapstructure:"backend"`
+	Compression     Compression     `mapstructure:"compression"`
+	Metrics         Metrics         `mapstructure:"metrics"`
 }
 
 // ValidateAndLog validates the config, terminating the program on any errors.
@@ -68,6 +70,7 @@ func (cfg *Configuration) ValidateAndLog() {
 	cfg.Log.validateAndLog()
 	cfg.RateLimiting.validateAndLog()
 	cfg.RequestLimits.validateAndLog()
+	cfg.ResponseCaching.validateAndLog()
 	cfg.Backend.validateAndLog()
 	cfg.Compression.validateAndLog()
 	cfg.Metrics.validateAndLog()
@@ -114,6 +117,14 @@ func (cfg *RequestLimits) validateAndLog() {
 	log.Infof("config.request_limits.max_ttl_seconds: %d", cfg.MaxTTLSeconds)
 	log.Infof("config.request_limits.max_size_bytes: %d", cfg.MaxSize)
 	log.Infof("config.request_limits.max_num_values: %d", cfg.MaxNumValues)
+}
+
+type ResponseCaching struct {
+	TTLSeconds int `mapstructure:"ttl_seconds"`
+}
+
+func (cfg *ResponseCaching) validateAndLog() {
+	log.Infof("config.response_caching.ttl_seconds: %v", cfg.TTLSeconds)
 }
 
 type Compression struct {

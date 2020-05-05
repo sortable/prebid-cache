@@ -12,6 +12,8 @@ import (
 	"github.com/prebid/prebid-cache/backends"
 )
 
+const mockHTTPCacheTTL = 60
+
 func doMockGet(t *testing.T, router *httprouter.Router, id string) *httptest.ResponseRecorder {
 	requestRecorder := httptest.NewRecorder()
 
@@ -58,7 +60,7 @@ func expectStored(t *testing.T, putBody string, expectedGet string, expectedMime
 	backend := backends.NewMemoryBackend()
 
 	router.POST("/cache", NewPutHandler(backend, 10, true))
-	router.GET("/cache", NewGetHandler(backend, true))
+	router.GET("/cache", NewGetHandler(backend, true, mockHTTPCacheTTL))
 
 	uuid, putTrace := doMockPut(t, router, putBody)
 	if putTrace.Code != http.StatusOK {
@@ -169,7 +171,7 @@ func TestXMLOther(t *testing.T) {
 func TestGetInvalidUUIDs(t *testing.T) {
 	backend := backends.NewMemoryBackend()
 	router := httprouter.New()
-	router.GET("/cache", NewGetHandler(backend, false))
+	router.GET("/cache", NewGetHandler(backend, false, mockHTTPCacheTTL))
 
 	getResults := doMockGet(t, router, "fdd9405b-ef2b-46da-a55a-2f526d338e16")
 	if getResults.Code != http.StatusNotFound {

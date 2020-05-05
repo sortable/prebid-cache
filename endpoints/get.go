@@ -12,7 +12,7 @@ import (
 	"github.com/prebid/prebid-cache/backends"
 )
 
-func NewGetHandler(backend backends.Backend, allowKeys bool) func(http.ResponseWriter, *http.Request, httprouter.Params) {
+func NewGetHandler(backend backends.Backend, allowKeys bool, httpCacheTTL int) func(http.ResponseWriter, *http.Request, httprouter.Params) {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		id, err := parseUUID(r, allowKeys)
 		if err != nil {
@@ -30,6 +30,11 @@ func NewGetHandler(backend backends.Backend, allowKeys bool) func(http.ResponseW
 		if err != nil {
 			http.Error(w, "No content stored for uuid="+id, http.StatusNotFound)
 			return
+		}
+
+		// Allow HTTP caching of the response so multiple requests in quick succession do not result in multiple round trips
+		if httpCacheTTL > 0 {
+			w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", httpCacheTTL))
 		}
 
 		if strings.HasPrefix(value, backends.XML_PREFIX) {
