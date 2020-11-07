@@ -1,13 +1,13 @@
 port: 2424
 admin_port: 2525
 log:
-  level: "info"
+  level: "error"
 rate_limiter:
   enabled: false
   num_requests: 2000
 request_limits:
   allow_setting_keys: true
-  max_size_bytes: 40960 # 40 KiB
+  max_size_bytes: 102400 # 100 KiB
   max_num_values: 10
   max_ttl_seconds: 3600
 backend:
